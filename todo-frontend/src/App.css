@@ -2,6 +2,7 @@
 
 :root {
   --primary: #4d65ff;
+  --primary-hover: #4d65ffa5;
   --primary-gradient: linear-gradient(135deg, #7b8aff 0%, #4d65ff 100%);
   --bg-page: #f4f7ff;
   --bg-card: #ffffff;
@@ -25,6 +26,7 @@
   --color-text-secondary: #a0a0b0;
   --color-border: #2d2d3f;
   --primary-gradient: linear-gradient(135deg, #6675ff 0%, #3a52f0 100%);
+  --trasition-duration: 0.8s;
 }
 
 * {
@@ -66,7 +68,8 @@ button, input, textarea, select {
 }
 
 .dashboard-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 280px 1fr;
   width: 100%;
   transition: all 0.3s ease;
 }

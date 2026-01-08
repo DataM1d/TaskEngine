@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { todoService } from '../services/todoService';
+import { Todo, FilterType } from '../types/todo';
 
 const useTodos = () => {
-  const [todos, setTodos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('All');
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await todoService.getAll();
-      setTodos(data);
+      setTodos((data as unknown as Todo[]) || []);
     } catch {
       console.error("Failed to fetch todos");
     } finally {
@@ -21,16 +23,26 @@ const useTodos = () => {
     fetchTodos();
   }, [fetchTodos]);
 
-  const addTodo = async (title, category) => {
+  const filteredTodos = useMemo(() => {
+    return todos.filter((todo) => {
+      if (activeFilter === 'Trash') return todo.status === 'deleted';
+      if (todo.status === 'deleted') return false;
+      if (activeFilter === 'Recovered') return todo.is_recovered === true;
+      if (activeFilter !== 'All') return todo.categories?.name === activeFilter;
+      return true;
+    });
+  }, [todos, activeFilter]);
+
+  const addTodo = async (title: string, categoryId: string | null) => {
     try {
-      const { data } = await todoService.create(title, category);
-      setTodos(prev => [data, ...prev]);
+      const { data } = await todoService.create(title, categoryId ?? undefined);
+      setTodos(prev => [(data as unknown as Todo), ...prev]);
     } catch {
       console.error("Failed to add todo");
     }
   };
 
-  const updateTodo = async (id, payload) => {
+  const updateTodo = async (id: string, payload: Partial<Todo>) => {
     const previousTodos = [...todos];
     setTodos(prev => prev.map(t => t.id === id ? { ...t, ...payload } : t));
     try {
@@ -40,7 +52,7 @@ const useTodos = () => {
     }
   };
 
-  const deleteTodo = async (id) => {
+  const deleteTodo = async (id: string) => {
     const previousTodos = [...todos];
     const targetTodo = todos.find(t => t.id === id);
     const isAlreadyDeleted = targetTodo?.status === 'deleted';
@@ -62,7 +74,7 @@ const useTodos = () => {
     }
   };
 
-  const restoreTodo = async (id) => {
+  const restoreTodo = async (id: string) => {
     const previousTodos = [...todos];
     setTodos(prev => prev.map(t => t.id === id ? { ...t, status: 'active', is_recovered: true } : t));
     try {
@@ -88,7 +100,7 @@ const useTodos = () => {
     }
   };
 
-  const deleteAll = async () => {
+  const deleteAllTrash = async () => {
     const previousTodos = [...todos];
     setTodos(prev => prev.filter(t => t.status !== 'deleted'));
     try {
@@ -99,14 +111,17 @@ const useTodos = () => {
   };
 
   return { 
-    todos, 
+    todos,
+    filteredTodos,
     loading, 
+    activeFilter,
+    setActiveFilter,
     addTodo, 
     updateTodo, 
     deleteTodo, 
     restoreTodo,
     clearCompleted, 
-    deleteAll, 
+    deleteAllTrash, 
     refreshTodos: fetchTodos 
   };
 };

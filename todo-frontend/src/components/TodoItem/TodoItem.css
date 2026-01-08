@@ -1,8 +1,9 @@
 :root {
   --color-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   --shadow-transition: box-shadow 0.2s ease-in-out;
-  --radius-lg: 24px;
+  --radius-lg: 16px;
   --radius-md: 10px;
+  --badge-width: 140px;
 }
 
 .todo-item,
@@ -28,7 +29,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28px 28px;
+  padding: 16px 24px;
   background: var(--color-card);
   border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--color-border), transparent 50%);
@@ -46,14 +47,33 @@
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
 }
 
+.todo-content-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
+}
+
+
 .dark-mode .todo-item {
   background: #1e293b;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .checkbox {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--color-border);
   border-radius: 8px;
   display: flex;
@@ -61,7 +81,7 @@
   justify-content: center;
   flex-shrink: 0;
   background: transparent;
-  box-shadow: 3px 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 3px 2px 6px rgba(0, 0, 0, 0.06);
   cursor: pointer;
 }
 
@@ -78,7 +98,7 @@
 }
 
 .checkmark-icon {
-  color: #ffffff !important;
+  color: #ffffffff;
   font-size: 1.2rem;
   font-weight: 900;
   display: block;
@@ -95,19 +115,37 @@
   box-shadow: 0 0 15px color-mix(in srgb, var(--primary), transparent 60%);
 }
 
-.task-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex: 1;
-  cursor: pointer;
+.todo-text {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.todo-text {
-  font-size: 2.1rem;
-  font-weight: 500;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;  font-weight: 400;
-  color: var(--color-text-main);
+.category-badge {
+  font-size: 0.92rem; 
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 0; 
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+  width: var(--badge-width);      
+  min-width: var(--badge-width);  
+  max-width: var(--badge-width); 
+  flex-shrink: 0;                
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.dark-mode .category-badge {
+  color: #c3dcf8ff;
 }
 
 .dark-mode .todo-text {
@@ -124,27 +162,21 @@
 .item-actions {
   display: flex;
   gap: 12px;
+  margin-left: 12px;
 }
 
 .delete-icon, .restore-btn {
-  background: color-mix(in srgb, var(--color-border), transparent 99%);
+  background: transparent;
   width: 32px;
   height: 32px;
-  font-size: 2.15rem;
-  border-radius: var(--radius-md);
+  font-size: 1.75rem;
+  border-radius: 8px;
   border: none; 
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-
-.delete-icon { 
-  color: var(--color-text-secondary); 
-}
-
-.restore-btn { 
-  color: var(--color-text-secondary); 
+  color: var(--text-muted);
 }
 
 .delete-icon:hover {
@@ -153,28 +185,23 @@
   transform: scale(1.05);
 }
 
+.dark-mode .delete-icon:hover {
+  background: #7f1d1d33;
+  color: #fca5a5ff;
+  opacity: 1;
+}
+
+
 .restore-btn:hover {
   background: #4ade8028;
   color: #0dc052f0;
-  transform: scale(1.05);
+  transform: scale(1.15);
 }
 
-.category-tag {
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-radius: 20px;
-  border: none;
-  text-transform: uppercase;
-  letter-spacing: 0.09rem; 
-  margin-left: auto;   
-  margin-right: 14px;
-  flex-shrink: 0;
-  width: auto;           
-  height: auto;           
-  display: inline-flex;
-  align-items: center;   
-  justify-content: center;
-  background: var(--color-card);
+.dark-mode .restore-btn:hover {
+  background: #16653433;
+  color: #6ee7b7ff;
+  opacity: 1;
 }
 
 .category-tag:hover {
@@ -185,3 +212,4 @@
 .dark-mode .category-tag {
   color: #e1e8f3ff;
 }
+

@@ -18,33 +18,39 @@
 
 .main-content {
   flex: 1;
-  padding: 80px 100px; 
+  padding: 80px 60px 80px 100px;
   min-height: 100vh;
   box-sizing: border-box;
   background-color: var(--color-bg);
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
+
+.dark-mode .main-content {
+  background-color: #0f172a;
+}
+
 
 .content-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
 .main-header h1 {
-  font-size: 5.2rem;
+  font-size: 4.2rem;
   font-weight: 850;
   margin-top: 2px;
   letter-spacing: -0.03em;
   color: var(--color-text-main);
   line-height: 1.1;
-  text-shadow: 0 0px 20px rgba(0, 0, 0, 0.14);
+  text-shadow: 0 0px 20px rgba(0, 0, 0, 0.03);
 }
 
 .filter-status {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   letter-spacing: 0.03em;
   color: var(--color-text-main);
   font-weight: 500;
@@ -56,7 +62,8 @@
 
 .dark-mode .main-header h1 {
   color: #dbe5f6ff;
-  text-shadow: 10px 10px 12px rgba(21, 20, 20, 0.92);
+  text-shadow: 10px 10px 12px rgba(21, 20, 20, 0.06);
+  transition: color var(--transition-duration) ease;
 }
 
 .tabs-header-row {
@@ -64,8 +71,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 80px;
-  gap: 20;
+  margin-bottom: 40px;
+  gap: 24px;
 }
 
 .filter-tabs {
@@ -74,7 +81,7 @@
 }
 
 .filter-tabs button {
-  height: 58px;
+  height: 54px;
   padding: 0 28px;
   border-radius: 18px;
   border: 1px solid hsla(224, 93%, 47%, 0.98);
@@ -82,7 +89,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   font-weight: 600;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   letter-spacing: 0.03em;
   display: flex;
   align-items: center;
@@ -95,7 +102,7 @@
 .filter-tabs button:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.03);
   filter: brightness(1.1);
   border-color: var(--primary);
   color: #3c3a3acc;
@@ -107,6 +114,16 @@
   color: white !important;
   border: 1px solid border-color: var(--primary);hsla(224, 85%, 62%, 0.98);
   box-shadow: 0 8px 16px color-mix(in srgb, var(--primary), transparent 70%);
+}
+
+.dark-mode .filter-tabs button {
+  background: var(--color-border);
+  box-shadow: 6px 10px 20px rgba(0, 0, 0, 0.03);
+}
+
+.dark-mode .filter-tabs button:hover {
+  background: var(--primary-hover);
+  color: white;
 }
 
 .pro-delete-btn {
@@ -179,15 +196,10 @@
   transition: width 2s linear;
 }
 
-.dark-mode .filter-tabs button {
-  background: var(--color-border);
-  box-shadow: 6px 10px 20px rgba(0, 0, 0, 0.8);
-}
-
 .input-group {
   display: flex;
   gap: 11px;
-  padding: 20px 28px 28px 28px;
+  padding: 12px 18px 12px 14px;
   border-radius: 20px;
   margin-bottom: 40px;
   align-items: center;
@@ -212,16 +224,24 @@
   outline: none;
 }
 
+.dark-mode .input-group, .dark-mode .input-group input {
+  border: 0 0 0 4px color-mix(in srgb, var(--primary-hover), transparent 75%);
+}
+
+.dark-mode .input-group:focus-within {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-hover), transparent 75%);
+}
+
 .add-button {
-  width: 25%;
-  height: 68px;
+  width: 20%;
+  height: 60px;
   border-radius: 16px;
   background: var(--primary);
   color: white;
   font-weight: 700;
-  font-size: 1.65rem;
+  font-size: 1.35rem;
   letter-spacing: 0.07rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,7 +253,7 @@
 .add-button:hover {
   transform: translateY(-2px);
   text-shadow: 2px 4px 2px rgba(0, 0, 0, 0.07);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
   filter: brightness(1.1);
   border-color: var(--primary);
   color: #3c3a3acc;
@@ -243,25 +263,21 @@
 .dark-mode .add-button {
   background: var(--color-border);
   color: #dbe5f6ff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   transition: background-color 0.4s ease;
+  border: 1px solid var(--primary-hover);
+
 }
 
 .dark-mode .add-button:hover {
-  background: var(--primary);
+  background: var(--primary-hover);
   color: white;
+  border: 2px solid var(--primary-hover);
 }
 
-.dark-mode .main-content {
-  background-color: #0f172a;
-}
-
-.dark-mode .input-group, {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-}
-
-.dark-mode .input-group:focus-within {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary), transparent 70%);
+.dark-mode .add-button:active {
+  background: var(--primary);
+  border: 2px solid var(--primary);
 }
 
 .todo-list {

@@ -4,11 +4,24 @@ import TodoHeader from './TodoHeader';
 import TodoInput from './TodoInput';
 import TodoTabs from './TodoTabs';
 import TodoItem from '../TodoItem/TodoItem';
+import { Todo, FilterType } from '../../types/todo';
+
+interface MainContentProps {
+  filter: FilterType;
+  onAdd: (title: string) => Promise<void>;
+  setFilter: (filter: FilterType) => void;
+  filteredTodos: Todo[];
+  updateTodo: (id: string, payload: Partial<Todo>) => Promise<void>;
+  deleteTodo: (id: string) => Promise<void>;
+  restoreTodo: (id: string) => Promise<void>;
+  deleteAll: () => Promise<void>;
+  loading: boolean;
+}
 
 const MainContent = memo(({ 
   filter, onAdd, setFilter, filteredTodos, updateTodo, deleteTodo, restoreTodo, deleteAll, loading 
-}) => {
-  const [confirmState, setConfirmState] = useState('idle');
+}: MainContentProps) => {
+  const [confirmState, setConfirmState] = useState<'idle' | 'confirm' | 'deleting'>('idle');
   const isTrashView = filter.toUpperCase() === 'TRASH' || filter.toUpperCase() === 'RECYCLE BIN';
 
   const handleDeleteAll = useCallback(async () => {

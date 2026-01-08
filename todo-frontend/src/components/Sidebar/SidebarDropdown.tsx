@@ -1,11 +1,19 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, ReactNode } from 'react';
 import useClickOutside from '../../hooks/useClickOutside';
 
-export default function SidebarDropdown({ title, children, defaultOpen = false }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const dropRef = useRef(null);
+interface SidebarDropdownProps {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}
 
-  useClickOutside(dropRef, () => setIsOpen(false));
+export default function SidebarDropdown({ title, children, defaultOpen = true}: SidebarDropdownProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const dropRef = useRef<HTMLElement>(null);
+
+  useClickOutside(dropRef, () => {
+    setIsOpen(false);
+  });
 
   return (
     <section ref={dropRef} className="dropdown-section">
