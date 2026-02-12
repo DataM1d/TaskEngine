@@ -1,28 +1,36 @@
-import { useState, useRef, ReactNode } from 'react';
-import useClickOutside from '../../hooks/useClickOutside';
+import { ReactNode } from 'react';
 
 interface SidebarDropdownProps {
   title: string;
   children: ReactNode;
-  defaultOpen?: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  actionButton?: ReactNode;
 }
 
-export default function SidebarDropdown({ title, children, defaultOpen = true}: SidebarDropdownProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const dropRef = useRef<HTMLElement>(null);
-
-  useClickOutside(dropRef, () => {
-    setIsOpen(false);
-  });
-
+export default function SidebarDropdown({ title, children, isOpen, onToggle, actionButton }: SidebarDropdownProps) {
   return (
-    <section ref={dropRef} className="dropdown-section">
-      <div className="dropdown-header" onClick={() => setIsOpen(!isOpen)}>
-        <span>{title}</span>
-        <span className={`chevron ${isOpen ? 'open' : ''}`}>▼</span>
+    <section className="dropdown-section">
+      <div 
+        className="dropdown-header" 
+        onClick={onToggle} 
+        role="button"
+        aria-expanded={isOpen}
+      >
+        <span className="dropdown-title">{title}</span>
+        
+        <div className="dropdown-header-actions">
+          {actionButton}
+          <span className={`chevron ${isOpen ? 'open' : ''}`}>
+             ▼
+          </span>
+        </div>
       </div>
+      
       <div className={`dropdown-container ${isOpen ? 'show' : ''}`}>
-        {children}
+        <div className="dropdown-content">
+          {children}
+        </div>
       </div>
     </section>
   );

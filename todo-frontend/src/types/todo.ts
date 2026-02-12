@@ -3,12 +3,15 @@ export type TodoStatus = 'active' | 'deleted';
 export interface Category {
     id: string;
     name: string;
+    icon?: string;
+    color?: string;
     created_at?: string;
 }
 
 export interface Todo {
     id: string;
     title: string;
+    description?: string;
     is_completed: boolean;
     is_recovered: boolean;
     category_id: string | null;
@@ -36,4 +39,4 @@ export interface SidebarStats {
     catCounts: Record<string, number>;
 }
 
-export type FilterType = 'All' | 'Trash' | 'Recovered' | string;
+export type FilterType = 'All' | 'Trash' | 'Recycle Bin' | 'Recovered' | 'Notes' | string;

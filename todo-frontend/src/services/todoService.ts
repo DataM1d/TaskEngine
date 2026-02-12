@@ -1,39 +1,25 @@
 import { supabase } from '../supabaseClient';
 import { Todo, Category } from '../types/todo';
+import { detectIconFromName } from '../utils/iconDetector';
+import { detectCategoryFromTitle } from '../utils/itemTypeDetector';
 
-const classifyWithMemory = async (title: string): Promise<string> => {
-    const cleanTitle = title.toLowerCase().trim();
-    if (!cleanTitle) return 'PERSONAL';
-    
-    try {
-        const { data: remembered } = await supabase
-            .from('ai_cache')
-            .select('category')
-            .eq('phrase', cleanTitle)
-            .maybeSingle();
-        if (remembered) return remembered.category;
-    } catch (e) {
-        console.error("Memory classification failed:", e);
-    }
-
-    const keywords = {
-        URGENT: ['urgent', 'boss', 'asap', 'deadline', 'priority'],
-        WORK: ['work', 'meeting', 'email', 'code', 'project', 'client']
-    };
-
-    if (keywords.URGENT.some(k => cleanTitle.includes(k))) return 'URGENT';
-    if (keywords.WORK.some(k => cleanTitle.includes(k))) return 'WORK';
-    
-    return 'PERSONAL';
+const formatName = (name: string): string => {
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
 };
 
+
 export const todoService = {
-    async getAll() {
-        const { data, error } = await supabase
-            .from('todos')
-            .select(`
+
+
+  async getAll() {
+    const { data, error } = await supabase
+      .from('todos')
+      .select(`
                 id, 
                 title, 
+                description,
                 is_completed, 
                 status, 
                 is_recovered, 
@@ -42,98 +28,182 @@ export const todoService = {
                 deleted_at, 
                 categories (name)
             `)
-            .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return { data: data as unknown as Todo[] };
-    },
+    if (error) throw error;
+    return { data: data as unknown as Todo[] };
+  },
 
-    async create(title: string, categoryName: string = 'PERSONAL') {
-        const systemFilters = ['ALL', 'ACTIVE', 'DONE', 'RECOVERED']; 
-        let target = categoryName.toUpperCase().trim();
-        
-        if (systemFilters.includes(target)) {
-            target = await classifyWithMemory(title);
-        }
+  async getAllCategories() {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name, icon, created_at')
+      .order('name', { ascending: true });
 
-        const { data: cat } = await supabase
-            .from('categories')
-            .select('id')
-            .eq('name', target)
-            .maybeSingle();
+    if (error) throw error;
 
-        const finalCategoryId = cat?.id || '2ff23eda-d5d3-4af3-b975-285172b85172';
+    return { 
+      data: (data as Category[]).map(cat => ({
+        ...cat,
+        name: formatName(cat.name),
+        icon: cat.icon || detectIconFromName(cat.name)
+      })) 
+    };
+  },
 
-        const { data, error } = await supabase
-            .from('todos')
-            .insert([{ 
-                title, 
-                is_completed: false,
-                status: 'active', 
-                is_recovered: false,
-                category_id: finalCategoryId
-            }])
-            .select(`id, title, is_completed, status, is_recovered, category_id, created_at, deleted_at, categories (name)`)
-            .single();
 
-        if (error) throw error;
+  async create(title: string, currentFilter: string = 'All') {
+    const systemFilters = ['ALL', 'TRASH', 'RECYCLE BIN', 'NOTES'];
+    let targetName = '';
 
-        supabase.from('ai_cache').upsert(
-            { phrase: title.toLowerCase().trim(), category: target },
-            { onConflict: 'phrase' }
-        ).then(); 
+    const cleanFilter = currentFilter.toUpperCase().trim();
 
-        return { data: data as unknown as Todo };
-    },
-
-    async update(id: string, payload: Partial<Todo>) {
-        const { data, error } = await supabase
-            .from('todos')
-            .update(payload)
-            .eq('id', id)
-            .select(`id, title, is_completed, status, is_recovered, category_id, created_at, deleted_at, categories (name)`)
-            .single();
-
-        if (error) throw error;
-        return { data: data as unknown as Todo };
-    },
-
-    async delete(id: string) {
-        const { error } = await supabase
-            .from('todos')
-            .update({
-                status: 'deleted',
-                deleted_at: new Date().toISOString()
-            })
-            .eq('id', id);
-        if (error) throw error;
-    },
-    
-    async restore(id: string) {
-        const { error } = await supabase 
-            .from('todos')
-            .update({
-                status: 'active',
-                is_recovered: true, 
-                deleted_at: null
-            })
-            .eq('id', id);
-        if (error) throw error;
-    },
-
-    async permanentlyDelete(id: string) {
-        const { error } = await supabase
-            .from('todos')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-    },
-
-    async deleteAll() {
-        const { error } = await supabase
-            .from('todos')
-            .delete()
-            .eq('status', 'deleted');
-        if (error) throw error;
+    if (systemFilters.includes(cleanFilter)) {
+      targetName = detectCategoryFromTitle(title);
+    } else {
+      targetName = currentFilter; 
     }
+
+    const { data: cat } = await supabase
+      .from('categories')
+      .select('id, name')
+      .ilike('name', targetName)
+      .maybeSingle();
+
+    const { data, error } = await supabase
+      .from('todos')
+      .insert([{
+        title,
+        is_completed: false,
+        status: 'active',
+        is_recovered: false,
+        category_id: cat?.id || null, 
+      }])
+      .select(`*, categories(name)`)
+      .single();
+
+    if (error) throw error;
+
+    if (cat && targetName.toUpperCase() !== 'PERSONAL') {
+      this.learn(title, cat.name);
+    }
+    return { data: data as unknown as Todo };
+  },
+
+  async createCategory(name: string) {
+    const categoryName = formatName(name);
+    
+    if (!categoryName) throw new Error('Category name cannot be empty');
+
+    const icon = detectIconFromName(categoryName);
+
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([{ name: categoryName, icon }])
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') throw new Error('Category already exists');
+      throw error;
+    }
+    return { data: data as unknown as Category };
+  },
+
+
+  async update(id: string, payload: Partial<Todo>) {
+    const { data, error } = await supabase
+      .from('todos')
+      .update(payload)
+      .eq('id', id)
+      .select(`id, title, is_completed, status, is_recovered, category_id, created_at, deleted_at, categories (name)`)
+      .single();
+
+    if (error) throw error;
+    return { data: data as unknown as Todo };
+  },
+
+  async updateDescription(id: string, description: string) {
+    const { data, error } = await supabase
+      .from('todos')
+      .update({ description })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data: data as unknown as Todo };
+  },
+
+  async bulkUpdateCategory(todoIds: string[], categoryId: string) {
+    if (todoIds.length === 0) return;
+    const { error } = await supabase
+      .from('todos')
+      .update({ category_id: categoryId })
+      .in('id', todoIds);
+    if (error) throw error;
+  },
+
+  async restore(id: string) {
+    const { error } = await supabase
+      .from('todos')
+      .update({
+        status: 'active',
+        is_recovered: true,
+        deleted_at: null
+      })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('todos')
+      .update({
+        status: 'deleted',
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteCategory(id: string) {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  async permanentlyDelete(id: string) {
+    const { error } = await supabase
+      .from('todos')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteAll() {
+    const { error } = await supabase
+      .from('todos')
+      .delete()
+      .eq('status', 'deleted');
+    if (error) throw error;
+  },
+
+
+  async learn(title: string, categoryName: string) {
+    const phrase = title.toLowerCase().trim();
+    const target = categoryName.trim().toUpperCase(); 
+    
+    const systemFilters = ['ALL', 'TRASH', 'NOTES', 'RECYCLE BIN'];
+    if (systemFilters.includes(target) || !phrase) return;
+
+    await supabase.from('ai_cache').upsert(
+      { phrase, category: target },
+      { onConflict: 'phrase' }
+    );
+  }
 };

@@ -1,100 +1,169 @@
-import { useState, useEffect, memo, useCallback } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import './MainContent.css';
 import TodoHeader from './TodoHeader';
 import TodoInput from './TodoInput';
 import TodoTabs from './TodoTabs';
 import TodoItem from '../TodoItem/TodoItem';
-import { Todo, FilterType } from '../../types/todo';
+import NotesWorkspace from '../notes/NotesWorkspace';
+import { FilterType, Todo } from '../../types/todo';
+import { IoTrashOutline } from 'react-icons/io5';
 
 interface MainContentProps {
   filter: FilterType;
+  focusedNoteId: string | null;
   onAdd: (title: string) => Promise<void>;
-  setFilter: (filter: FilterType) => void;
+  setFilter: (filter: FilterType, noteId?: string) => void;
   filteredTodos: Todo[];
+  allTodos: Todo[];
   updateTodo: (id: string, payload: Partial<Todo>) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
   restoreTodo: (id: string) => Promise<void>;
   deleteAll: () => Promise<void>;
   loading: boolean;
+  onCategoryCreated: (name: string) => Promise<void>;
+  onToggleSidebar: () => void; 
 }
 
-const MainContent = memo(({ 
-  filter, onAdd, setFilter, filteredTodos, updateTodo, deleteTodo, restoreTodo, deleteAll, loading 
-}: MainContentProps) => {
-  const [confirmState, setConfirmState] = useState<'idle' | 'confirm' | 'deleting'>('idle');
-  const isTrashView = filter.toUpperCase() === 'TRASH' || filter.toUpperCase() === 'RECYCLE BIN';
+const MainContent = memo(
+  ({
+    filter,
+    focusedNoteId,
+    filteredTodos,
+    allTodos,
+    loading,
+    onAdd,
+    setFilter,
+    updateTodo,
+    deleteTodo,
+    restoreTodo,
+    deleteAll,
+    onCategoryCreated,
+  }: MainContentProps) => {
+    const [confirmState, setConfirmState] = useState<'idle' | 'confirm' | 'deleting'>('idle');
+    const [selectedNote, setSelectedNote] = useState<Todo | null>(null);
+    const [isAddingFlash, setIsAddingFlash] = useState(false);
 
-  const handleDeleteAll = useCallback(async () => {
-    if (confirmState === 'idle') {
-      setConfirmState('confirm');
-      return;
-    }
-    setConfirmState('deleting');
-    try {
-      await deleteAll();
-      setConfirmState('idle');
-    } catch (e) {
-      console.error(e);
-      setConfirmState('idle');
-    }
-  }, [confirmState, deleteAll]);
+    const isTrashView = filter === 'Trash';
+    const isNotesView = filter === 'Notes';
 
-  useEffect(() => {
-    if (confirmState === 'confirm') {
-      const timer = setTimeout(() => setConfirmState('idle'), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [confirmState]);
+    useEffect(() => {
+      if (focusedNoteId && filter === 'Notes') {
+        const noteToFocus = allTodos.find(t => t.id === focusedNoteId);
+        if (noteToFocus) setSelectedNote(noteToFocus);
+      }
+    }, [focusedNoteId, filter, allTodos]);
 
-  return (
-    <main className="main-content">
-      <div className="content-container">
-        <TodoHeader filter={filter} taskCount={filteredTodos.length} />
-        <div className="tabs-header-row">
-          <TodoTabs activeFilter={filter} setFilter={setFilter} />
-          <div className="list-controls">
-            {filteredTodos.length > 0 && isTrashView && (
-              <button 
-                disabled={confirmState === 'deleting'}
-                className={`pro-delete-btn ${confirmState}`}
-                onClick={handleDeleteAll}
-                title="Empty Trash"
-              >
-                <svg className="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                {confirmState === 'confirm' && <div className="btn-progress" />}
-              </button>
-            )}
-          </div>
+    useEffect(() => {
+      if (!isNotesView) setSelectedNote(null);
+    }, [isNotesView]);
+
+    const handleDeleteAll = useCallback(async () => {
+      if (confirmState === 'idle') {
+        setConfirmState('confirm');
+        return;
+      }
+      setConfirmState('deleting');
+      try {
+        await deleteAll();
+      } finally {
+        setConfirmState('idle');
+      }
+    }, [confirmState, deleteAll]);
+
+    useEffect(() => {
+      if (confirmState === 'confirm') {
+        const timer = setTimeout(() => setConfirmState('idle'), 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [confirmState]);
+
+    const handleAddWithFlash = useCallback(async (title: string) => {
+      setIsAddingFlash(true);
+      await onAdd(title);
+      setTimeout(() => setIsAddingFlash(false), 800);
+    }, [onAdd]);
+
+    const notes = useMemo(
+      () => allTodos.filter((t) => t.status !== 'deleted' && (t.description?.trim().length || 0) > 0),
+      [allTodos]
+    );
+
+    return (
+      <main className="sb-dashboard-shell">
+        {/* Header moved outside container to maintain a consistent vertical anchor */}
+        <TodoHeader
+          filter={filter}
+          taskCount={isNotesView ? notes.length : filteredTodos.length}
+        />
+
+        <div className={`sb-container ${isNotesView ? 'is-notes-view' : ''}`}>
+          {isNotesView ? (
+            <NotesWorkspace
+              notes={notes}
+              selectedNote={selectedNote}
+              onSelectNote={setSelectedNote}
+              onUpdateNote={updateTodo}
+            />
+          ) : (
+            <>
+              <div className="sb-workspace">
+                <div className="tabs-header-row">
+                  <TodoTabs activeFilter={filter} setFilter={setFilter} />
+
+                  {isTrashView && filteredTodos.length > 0 && (
+                    <button
+                      className={`pro-delete-btn ${confirmState}`}
+                      disabled={confirmState === 'deleting'}
+                      onClick={handleDeleteAll}
+                      title={confirmState === 'confirm' ? 'Click again to confirm' : 'Empty Trash'}
+                    >
+                     {confirmState === 'deleting' ? <div className="btn-spinner" /> : <IoTrashOutline size={20} />}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {!isTrashView && (
+                <TodoInput 
+                  onAdd={handleAddWithFlash} 
+                  isFlashActive={isAddingFlash}
+                />
+              )}
+
+              <ul className="todo-list">
+                {loading ? (
+                  <LoadingSkeleton />
+                ) : filteredTodos.length > 0 ? (
+                  filteredTodos.map((todo) => (
+                    <TodoItem
+                      key={todo.id}
+                      todo={todo}
+                      onToggle={() => updateTodo(todo.id, { is_completed: !todo.is_completed })}
+                      onDelete={() => deleteTodo(todo.id)}
+                      onRestore={() => restoreTodo(todo.id)}
+                      onUpdate={updateTodo}
+                      isTrashView={isTrashView}
+                      setFilter={setFilter}
+                      onCategoryCreated={onCategoryCreated}
+                    />
+                  ))
+                ) : (
+                  <div className="empty-state-msg">No tasks found.</div>
+                )}
+              </ul>
+            </>
+          )}
         </div>
-        {!isTrashView && <TodoInput onAdd={onAdd}/>}
-        <ul className="todo-list">
-          {loading ? (
-            <LoadingSkeleton />
-          ) : filteredTodos.length > 0 ? (
-            filteredTodos.map(todo => (
-              <TodoItem 
-                key={todo.id} 
-                todo={todo}
-                onToggle={() => updateTodo(todo.id, { is_completed: !todo.is_completed })}
-                onDelete={() => deleteTodo(todo.id)}
-                onRestore={() => restoreTodo(todo.id)}
-                isTrashView={isTrashView} 
-              />
-            ))
-          ) : null} 
-        </ul>
-      </div>
-    </main>
-  );
-});
+      </main>
+    );
+  }
+);
 
 const LoadingSkeleton = () => (
   <>
     {[1, 2, 3].map((n) => (
       <li key={n} className="skeleton-item" style={{ listStyle: 'none' }}>
-        <div className="skeleton-shimmer" style={{ height: '60px', background: '#eee', borderRadius: '12px', marginBottom: '15px' }}></div>
+        <div className="skeleton-shimmer" style={{ height: '60px', borderRadius: '10px', marginBottom: '12px' }} />
       </li>
     ))}
   </>
