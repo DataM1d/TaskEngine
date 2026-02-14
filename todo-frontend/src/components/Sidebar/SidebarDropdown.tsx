@@ -1,4 +1,6 @@
 import { ReactNode } from 'react';
+import './SidebarDropdown.css';
+
 
 interface SidebarDropdownProps {
   title: string;

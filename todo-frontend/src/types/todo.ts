@@ -35,6 +35,7 @@ export interface SidebarStats {
     active: number;
     completed: number;
     deleted: number;
+    notes: number;
     recovered: number;
     catCounts: Record<string, number>;
 }

@@ -6,28 +6,22 @@ import { detectCategoryFromTitle } from '../utils/itemTypeDetector';
 const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
 
   const fetchTodos = useCallback(async () => {
-    setLoading(true);
     try {
       const { data } = await todoService.getAll();
-      setTodos((data as unknown as Todo[]) || []);
-    } catch (error) {
-      console.error('Failed to fetch todos:', error);
-    } finally {
-      setLoading(false);
-    }
+      setTodos(data || []);
+    } catch (err) { console.error(err); } 
+    finally { setLoading(false); }
   }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
       const { data } = await todoService.getAllCategories();
       setCategories(data || []);
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-    }
+    } catch (err) { console.error(err); }
   }, []);
 
   useEffect(() => {
@@ -35,192 +29,105 @@ const useTodos = () => {
     fetchCategories();
   }, [fetchTodos, fetchCategories]);
 
- 
+  const stats = useMemo(() => {
+    const activeTodos = todos.filter(t => t.status !== 'deleted');
+    return {
+      total: activeTodos.length,
+      completed: activeTodos.filter(t => t.is_completed).length,
+      active: activeTodos.filter(t => !t.is_completed).length,
+      deleted: todos.filter(t => t.status === 'deleted').length,
+      recovered: todos.filter(t => t.is_recovered).length,
+      notes: activeTodos.filter(t => t.description?.trim()).length,
+      catCounts: {} 
+    };
+  }, [todos]);
+
   const filteredTodos = useMemo(() => {
     return todos.filter((todo) => {
-      if (activeFilter === 'Trash') {
-        return todo.status === 'deleted';
-      }
+      if (activeFilter === 'Trash') return todo.status === 'deleted';
+      if (todo.status === 'deleted') return false; 
 
-      if (todo.status === 'deleted') {
-        return false;
+      switch (activeFilter) {
+        case 'All': return true;
+        case 'Notes': return !!todo.description?.trim();
+        case 'Recycle Bin':
+        case 'Recovered': return todo.is_recovered;
+        default: return todo.categories?.name === activeFilter;
       }
-
-      if (activeFilter === 'Recycle Bin' || activeFilter === 'Recovered') {
-        return todo.is_recovered === true;
-      }
-
-      if (activeFilter === 'Notes') {
-        return todo.description && todo.description.trim().length > 0;
-      }
-
-      if (activeFilter === 'Recovered') {
-        return todo.is_recovered === true;
-      }
-
-      if (activeFilter !== 'All') {
-        return todo.categories?.name === activeFilter;
-      }
-
-      return true;
     });
   }, [todos, activeFilter]);
 
-  const addTodo = async (title: string, categoryId: string | null) => {
+  const updateTodo = async(id: string, payload: Partial<Todo>) => {
+    const original = [...todos];
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, ...payload } : t));
+
     try {
-      const { data } = await todoService.create(title, categoryId ?? undefined);
-      setTodos(prev => [data, ...prev]);
+      const target = original.find(t => t.id === id);
+      
+      if (payload.category_id && target) {
+        const newCat = categories.find(c => c.id === payload.category_id);
+        if (newCat) todoService.learn(target.title, newCat.name);
+      }
+
+      if ('description' in payload && Object.keys(payload).length === 1) {
+        await todoService.updateDescription(id, payload.description as string);
+      } else {
+        await todoService.update(id, payload);
+      }
     } catch (error) {
-      console.error('Failed to add todo:', error);
+      setTodos(original); 
     }
   };
-
-const updateTodo = async (id: string, payload: Partial<Todo>) => {
-  const previousTodos = [...todos];
-  const targetTodo = todos.find(t => t.id === id);
-  
-  setTodos(prev => prev.map(t => (t.id === id ? { ...t, ...payload } : t)));
-  
-  try {
-    if (payload.category_id && targetTodo) {
-      const newCat = categories.find(c => c.id === payload.category_id);
-      if (newCat) {
-        await todoService.learn(targetTodo.title, newCat.name);
-      }
-    }
-
-    if ('description' in payload && Object.keys(payload).length === 1) {
-      await todoService.updateDescription(id, payload.description as string);
-    } else {
-      await todoService.update(id, payload);
-    }
-  } catch (error) {
-    setTodos(previousTodos);
-  }
- };
 
   const deleteTodo = async (id: string) => {
-    const previousTodos = [...todos];
-    const targetTodo = todos.find(t => t.id === id);
-    const isAlreadyInTrash = targetTodo?.status === 'deleted';
+    const original = [...todos];
+    const target = todos.find(t => t.id === id);
+    const isTrash = target?.status === 'deleted';
 
-    if (isAlreadyInTrash) {
-      setTodos(prev => prev.filter(t => t.id !== id));
-      try {
-        await todoService.permanentlyDelete(id);
-      } catch {
-        setTodos(previousTodos);
-      }
-    } else {
-      setTodos(prev => prev.map(t => (t.id === id ? { ...t, status: 'deleted' } : t)));
-      try {
-        await todoService.delete(id);
-      } catch {
-        setTodos(previousTodos);
-      }
-    }
-  };
-
-  const restoreTodo = async (id: string) => {
-    const previousTodos = [...todos];
-    setTodos(prev => prev.map(t => 
-      t.id === id ? { ...t, status: 'active', is_recovered: true } : t
-    ));
+    setTodos(prev => isTrash ? prev.filter(t => t.id !== id) : prev.map(t => t.id === id ? { ...t, status: 'deleted' } : t));
 
     try {
-      await todoService.restore(id);
+      isTrash ? await todoService.permanentlyDelete(id) : await todoService.delete(id);
     } catch {
-      setTodos(previousTodos);
-    }
-  };
-
-  const clearCompleted = async () => {
-    const previousTodos = [...todos];
-    const completedIds = todos
-      .filter(t => t.is_completed && t.status === 'active')
-      .map(t => t.id);
-    
-    if (completedIds.length === 0) return;
-
-    setTodos(prev => prev.map(t => 
-      completedIds.includes(t.id) ? { ...t, status: 'deleted' } : t
-    ));
-
-    try {
-      await Promise.all(completedIds.map(id => todoService.delete(id)));
-    } catch {
-      setTodos(previousTodos);
-    }
-  };
-
-  const deleteAllTrash = async () => {
-    const previousTodos = [...todos];
-    setTodos(prev => prev.filter(t => t.status !== 'deleted'));
-    
-    try {
-      await todoService.deleteAll();
-    } catch {
-      setTodos(previousTodos);
+      setTodos(original); 
     }
   };
 
   const createCategory = async (name: string) => {
     try {
-      const response = await todoService.createCategory(name);
-      const newCat = response.data;
+      const { data: newCat } = await todoService.createCategory(name);
+      if (!newCat) return;
 
-    if (newCat) {
-      const todosToUpdate = todos.filter(t => 
-        !t.category_id && 
-        detectCategoryFromTitle(t.title).toUpperCase() === newCat.name.toUpperCase()
+      const matchingTodos = todos.filter(t => 
+        !t.category_id && detectCategoryFromTitle(t.title).toUpperCase() === newCat.name.toUpperCase()
       );
 
-      if (todosToUpdate.length > 0) {
-        const ids = todosToUpdate.map(t => t.id);
-        await todoService.bulkUpdateCategory(ids, newCat.id);
+      if (matchingTodos.length > 0) {
+        await todoService.bulkUpdateCategory(matchingTodos.map(t => t.id), newCat.id);
       }
 
-        await fetchCategories();
-       await fetchTodos();
-      }
-    } catch (error) {
-      console.error('Failed to create category:', error);
-      throw error;
+      await Promise.all([fetchCategories(), fetchTodos()]);
+    } catch (err) { throw err; }
+  };
+
+  return {
+    todos, categories, filteredTodos, stats, loading, activeFilter,
+    setActiveFilter, updateTodo, deleteTodo, createCategory,
+    addTodo: async (title: string, catId: string | null) => {
+        const { data } = await todoService.create(title, catId ?? undefined);
+        setTodos(prev => [data, ...prev]);
+    },
+    restoreTodo: async (id: string) => {
+      const original = [...todos];
+      setTodos(prev => prev.map(t => t.id === id ? { ...t, status: 'active', is_recovered: true } : t));
+      try { await todoService.restore(id); } catch { setTodos(original); }
+    },
+    deleteAllTrash: async () => {
+      const original = [...todos];
+      setTodos(prev => prev.filter(t => t.status !== 'deleted'));
+      try { await todoService.deleteAll(); } catch { setTodos(original); }
     }
   };
-
-  const deleteCategory = async (id: string) => {
-    try {
-      await todoService.deleteCategory(id);
-      await fetchCategories();
-      await fetchTodos();
-
-      if (activeFilter !== 'All' && activeFilter !== 'Trash' && activeFilter !== 'Notes') {
-        setActiveFilter('All');
-      }
-    } catch (error) {
-      console.error('Failed to delete category:', error);
-    }
-  };
-
-  return { 
-    todos,
-    categories,
-    filteredTodos,
-    loading, 
-    activeFilter,
-    setActiveFilter,
-    addTodo, 
-    updateTodo, 
-    deleteTodo, 
-    restoreTodo,
-    clearCompleted, 
-    deleteAllTrash, 
-    refreshTodos: fetchTodos,
-    refreshCategories: fetchCategories,
-    createCategory,
-    deleteCategory
-  };
-};
+}
 
 export default useTodos;

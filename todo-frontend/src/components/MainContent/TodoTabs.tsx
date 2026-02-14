@@ -1,4 +1,5 @@
 import { FilterType } from '../../types/todo';
+import './TodoTabs.css';
 
 interface TodoTabsProps {
   activeFilter: FilterType;
@@ -6,18 +7,20 @@ interface TodoTabsProps {
 }
 
 export default function TodoTabs({ activeFilter, setFilter }: TodoTabsProps) {
-  const tabs: FilterType[] = ['All', 'Trash'];
+  // Explicitly defining system workspace filters
+  const tabs: FilterType[] = ['All', 'Notes', 'Trash'];
 
   return (
     <nav className="filter-tabs">
-      {['All', 'Trash'].map(tab => (
+      {tabs.map(tab => (
         <button
           key={tab}
           onClick={() => setFilter(tab)}
           className={activeFilter === tab ? 'active' : ''}
-          >
-            {tab}
-          </button>
+          aria-current={activeFilter === tab ? 'page' : undefined}
+        >
+          {tab}
+        </button>
       ))}
     </nav>
   );

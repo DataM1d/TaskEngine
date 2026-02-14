@@ -1,4 +1,5 @@
 import { useState, FormEvent, KeyboardEvent } from 'react';
+import './TodoInput.css';
 
 interface TodoInputProps {
   onAdd: (text: string) => void;
