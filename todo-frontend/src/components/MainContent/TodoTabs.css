@@ -1,0 +1,32 @@
+.tabs-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-7);
+  gap: var(--space-5);
+}
+
+.filter-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.filter-tabs button {
+  padding: 0 14px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--sb-text-main);
+  background: transparent;
+  border: 1px solid var(--sb-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  min-height: 32px;
+  transition: all 0.2s var(--ease-standard);
+}
+
+.filter-tabs button:hover, 
+.filter-tabs button.active {
+  background: var(--sb-brand);
+  color: var(--sb-text-white);
+  border-color: var(--sb-brand);
+}

@@ -1,0 +1,45 @@
+.glass-notepad {
+  position: absolute;
+  top: 100%;
+  right: -1px;
+  width: 310px;
+  z-index: 10;
+  background: color-mix(in srgb, var(--sb-surface), transparent 30%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--sb-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s var(--ease-standard);
+}
+
+.notepad-workspace {
+  border: 1px solid var(--sb-border);
+  margin: 0 4px;
+  background: var(--sb-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.glass-notepad textarea {
+  width: 100%;
+  min-height: 140px;
+  background: transparent;
+  color: var(--sb-text-main);
+  padding: var(--space-3);
+  resize: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-ui);
+}
+
+@keyframes statusSuccess {
+  0% { color: var(--sb-text-muted); }
+  10% { color: #4ade80; transform: scale(1.05); }
+  100% { color: var(--sb-text-muted); }
+}
+
+.footer-status.saved-active {
+  animation: statusSuccess 2s var(--ease-standard);
+}
