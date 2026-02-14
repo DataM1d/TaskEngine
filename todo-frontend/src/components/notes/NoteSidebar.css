@@ -1,0 +1,44 @@
+.workspace-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: color-mix(in srgb, var(--sb-bg), transparent 40%);
+  border-right: 1px solid var(--sb-border);
+}
+
+.sidebar-header {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--sb-border);
+}
+
+.note-item-preview {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--space-2);
+  border: 1px solid transparent;
+}
+
+.note-item-preview.active {
+  background: color-mix(in srgb, var(--sb-brand), transparent 92%);
+  border-color: color-mix(in srgb, var(--sb-brand), transparent 85%);
+  box-shadow: inset 3px 0 0 var(--sb-brand);
+}
+
+.note-title {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--sb-text-main);
+}
+
+.note-snippet {
+  font-size: var(--text-xs);
+  color: var(--sb-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

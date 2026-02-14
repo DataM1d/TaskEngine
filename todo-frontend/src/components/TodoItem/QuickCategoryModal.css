@@ -1,0 +1,30 @@
+.item-type-badge {
+  min-width: 80px;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--sb-text-muted), transparent 92%);
+  border: 1px solid var(--sb-border);
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.item-type-badge.virtual-badge {
+  background: repeating-linear-gradient(
+    45deg, 
+    transparent, 
+    transparent 5px, 
+    color-mix(in srgb, var(--sb-brand), transparent 95%) 5px
+  );
+  border: 1.5px dashed color-mix(in srgb, var(--sb-brand), transparent 40%);
+  animation: border-dance 20s linear infinite;
+}
+
+@keyframes border-dance {
+  from { background-position: 0 0; }
+  to { background-position: 100px 100px; }
+}
