@@ -18,8 +18,9 @@ export interface Todo {
     status: TodoStatus;
     created_at: string;
     deleted_at: string | null;
+    notes: string;
     categories?: {
-        name: string;
+    name: string;
     };
 }
 
