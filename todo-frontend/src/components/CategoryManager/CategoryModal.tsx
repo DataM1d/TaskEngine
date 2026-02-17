@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTodoContext } from '../../context/TodoContext';
 import CategoryIcon from '../ui/CategoryIcon';
 import { detectIconFromName } from '../../utils/iconDetector';
-import './CategoryManager.css'; // Ensure your styles are linked
+import './CategoryManager.css'; 
 
 interface CategoryModalProps {
   isOpen: boolean;
