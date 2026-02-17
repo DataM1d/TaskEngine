@@ -40,7 +40,6 @@ The (useNoteAutoSave) hook ensures drafts are preserved:
   The result is a responsive editing experience with reliable persistence.
 
 Keyboard Shortcuts
-  Shortcut	Action
   Cmd + B	Toggle sidebar
   Cmd + L	Toggle theme
   Cmd + I	Jump to notes
