@@ -13,7 +13,6 @@ function AppLayout() {
   const { width, isHidden, toggle, startResizing } = useSidebar();
   const { activeFilter, focusedNoteId, handleNavigate } = useNavigation();
 
-  // Inject sidebar width into CSS variables for the whole app tree
   const dynamicStyles = { 
     '--sidebar-width': `${width}px` 
   } as React.CSSProperties;
@@ -42,7 +41,6 @@ function AppLayout() {
   );
 }
 
-// Separate Provider from Layout to ensure Context is available within AppLayout
 export default function App() {
   return (
     <TodoProvider>

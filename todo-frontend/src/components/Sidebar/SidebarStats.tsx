@@ -1,4 +1,5 @@
 import './SidebarStats.css';
+
 interface SidebarStatsProps {
   completed: number;
   active: number;

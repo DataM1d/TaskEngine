@@ -19,7 +19,7 @@ export default function SidebarItem({
     <li onClick={onClick} className={`category-item ${isActive ? 'active' : ''}`}>
       <div className='item-label'>
         <span className='icon'>
-          <CategoryIcon iconName={detectIconFromName(icon, isDarkMode)} size={20} />
+          <CategoryIcon iconName={detectIconFromName(icon, isDarkMode)} size={16} />
         </span>
         <span className="category-name-text">{label}</span>
       </div>

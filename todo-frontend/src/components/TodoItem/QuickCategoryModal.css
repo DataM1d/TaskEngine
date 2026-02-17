@@ -1,30 +1,29 @@
 .item-type-badge {
-  min-width: 80px;
-  height: 22px;
-  padding: 0 10px;
-  font-size: 0.75em;
+  width: 80px; /* Force uniform width */
+  justify-content: center; /* Center text inside fixed width */
+  height: 20px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   font-weight: 600;
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--sb-text-muted), transparent 92%);
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  background: var(--sb-active-item-bg);
   border: 1px solid var(--sb-border);
   color: var(--sb-text-muted);
-  cursor: pointer;
-  transition: all var(--transition-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Handle overflow gracefully */
 }
 
 .item-type-badge.virtual-badge {
-  background: repeating-linear-gradient(
-    45deg, 
-    transparent, 
-    transparent 5px, 
-    color-mix(in srgb, var(--sb-brand), transparent 95%) 5px
-  );
-  border: 1.5px dashed color-mix(in srgb, var(--sb-brand), transparent 40%);
-  animation: border-dance 20s linear infinite;
+  border: 1px dashed var(--sb-brand);
+  background: color-mix(in srgb, var(--sb-brand), transparent 96%);
+  color: var(--sb-brand);
 }
 
-@keyframes border-dance {
-  from { background-position: 0 0; }
-  to { background-position: 100px 100px; }
+.item-type-badge:hover {
+  border-color: var(--sb-text-muted);
+  color: var(--sb-text-main);
 }

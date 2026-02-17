@@ -29,7 +29,6 @@ export default function NoteSidebar({ notes, selectedId, onSelect }: NoteSidebar
                 <div className="note-title">{note.title || "Untitled Note"}</div>
                 <div className="note-internal-divider" />
                 <div className="note-snippet">
-                  {/* Senior Move: Clean strings for cleaner previews */}
                   {note.description?.replace(/\n/g, ' ').substring(0, 45) || "No content..."}
                 </div>
               </div>

@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import { useTodoContext } from '../../context/TodoContext';
 import { FilterType } from '../../types/todo';
-import CategoryIcon from '../ui/CategoryIcon';
-import { detectIconFromName } from '../../utils/iconDetector';
+import SidebarItem from './SidebarItem';
 
 interface CategorySectionProps {
   isDarkMode: boolean;
@@ -28,30 +27,22 @@ export default function CategorySection({ isDarkMode, activeFilter, onSelect }: 
   };
 
   return (
-    <ul className="dropdown-list">
+    <>
       {categories.map(cat => {
-        // Calculate count once per category render
         const count = todos.filter(t => t.categories?.name === cat.name && t.status !== 'deleted').length;
         
         return (
-          <li 
-            key={cat.id} 
-            onClick={() => onSelect(cat.name)} 
-            className={`category-item ${activeFilter === cat.name ? 'active' : ''} ${deleteConfirmId === cat.id ? 'delete-confirm' : ''}`}
-          >
-            <div className="item-label">
-              <span className="icon">
-                <CategoryIcon iconName={detectIconFromName(cat.name, isDarkMode)} size={20} />
-              </span>
-              <span className="category-name-text">{cat.name}</span>
-            </div>
-            <div className="item-actions">
-              <button className="category-delete-btn-right" onClick={(e) => handleDelete(e, cat.id)}>-</button>
-              {count > 0 && <span className="count-badge">{count}</span>}
-            </div>
-          </li>
+          <SidebarItem
+            key={cat.id}
+            label={cat.name}
+            icon={cat.name}
+            count={count}
+            isActive={activeFilter === cat.name}
+            onClick={(() => onSelect(cat.name))}
+            isDarkMode={isDarkMode}
+          />
         );
       })}
-    </ul>
+    </>
   );
 }

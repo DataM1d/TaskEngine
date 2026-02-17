@@ -1,16 +1,16 @@
 .sidebar-stats {
-  margin: var(--space-4); 
+  margin: var(--space-3); 
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--sb-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 0.2px solid var(--sb-border);
+  border: 1px solid var(--sb-border);
 }
 
 .stat-item {
-  padding: var(--space-nb) var(--space-4);
+  padding: 12px 8px;
   background: var(--sb-bg);
   display: flex;
   flex-direction: column;
@@ -18,19 +18,20 @@
   transition: background-color var(--transition-base);
 }
 
-.stat-item:hover {
-  background: var(--sb-surface);
+.stat-item.border-left {
+  border-left: none;
 }
 
 .stat-number {
-  font-size: 1.20rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   font-family: var(--font-mono);
   color: var(--sb-text-main);
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.80rem;
   margin-top: var(--space-1);
   font-weight: 700;
   letter-spacing: 0.05em;

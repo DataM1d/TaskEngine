@@ -1,5 +1,3 @@
-import React from 'react';
-
 const LoadingSkeleton = () => {
   const skeletonRows = [1, 2, 3];
 

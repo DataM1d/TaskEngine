@@ -2,7 +2,6 @@ import { createContext, useContext, ReactNode } from 'react';
 import useTodos from '../hooks/useTodos';
 import { Todo, Category, FilterType, SidebarStats } from '../types/todo';
 
-// Defining the contract explicitly instead of using ReturnType
 interface TodoContextType {
   todos: Todo[];
   categories: Category[];

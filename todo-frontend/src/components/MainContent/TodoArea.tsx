@@ -18,8 +18,6 @@ export default function TodoArea({ filter, isTrashView, setFilter }: TodoAreaPro
 
   const handleAdd = useCallback(async (title: string) => {
     setIsAddingFlash(true);
-    // By passing 'filter', the todoService will auto categorize 
-    // the task based on the current active view.
     await addTodo(title, filter); 
     setTimeout(() => setIsAddingFlash(false), 800);
   }, [addTodo, filter]);
@@ -27,27 +25,33 @@ export default function TodoArea({ filter, isTrashView, setFilter }: TodoAreaPro
   if (loading) return <LoadingSkeleton />;
 
   return (
-    <>
+    <div className="todo-area-wrapper">
       {!isTrashView && (
-        <TodoInput onAdd={handleAdd} isFlashActive={isAddingFlash} />
+        <>
+          <div className="input-static-container">
+              <TodoInput onAdd={handleAdd} isFlashActive={isAddingFlash} />
+          </div>
+        </>
       )}
 
-      <ul className="todo-list">
-        {filteredTodos.length > 0 ? (
-          filteredTodos.map((todo) => (
-            <TodoItem 
-              key={todo.id} 
-              todo={todo} 
-              setFilter={setFilter} 
-              isTrashView={isTrashView} 
-            />
-          ))
-        ) : (
-          <div className="empty-state-msg">
-            {isTrashView ? "Trash is empty." : "No tasks found in this category."}
-          </div>
-        )}
-      </ul>
-    </>
+      <div className="todo-list-scroll-engine">
+        <ul className="todo-list">
+          {filteredTodos.length > 0 ? (
+            filteredTodos.map((todo) => (
+              <TodoItem 
+                key={todo.id} 
+                todo={todo} 
+                setFilter={setFilter} 
+                isTrashView={isTrashView} 
+              />
+            ))
+          ) : (
+            <div className="empty-state-msg">
+              {isTrashView ? "Trash is empty." : "No tasks found in this category."}
+            </div>
+          )}
+        </ul>
+      </div>
+    </div>
   );
 }

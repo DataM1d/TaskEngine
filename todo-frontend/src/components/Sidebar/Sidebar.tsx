@@ -1,14 +1,14 @@
-import { useState, memo } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { useTodoContext } from '../../context/TodoContext';
-import { FilterType } from '../../types/todo'; // Import your types
+import { FilterType } from '../../types/todo';
 import SidebarStats from './SidebarStats';
 import SidebarDropdown from './SidebarDropdown';
 import SidebarItem from './SidebarItem';
-import CategorySection from './CategorySection';
+import CategoryIcon from '../ui/CategoryIcon';
 import CategoryModal from '../CategoryManager/CategoryModal';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import './Sidebar.css';
 
-// 1. Strict Interface Definition
 interface SidebarProps {
   isDarkMode: boolean;
   setIsDarkMode: (val: boolean) => void;
@@ -20,14 +20,37 @@ interface SidebarProps {
 
 const Sidebar = memo(({ 
   isDarkMode, 
+  setIsDarkMode,
   onSelectCategory, 
   onResizeStart, 
   hidden, 
   onToggle 
 }: SidebarProps) => {
-  // 2. Consume pre-calculated stats from Context
-  const { activeFilter, clearCompleted, stats } = useTodoContext();
+  const { activeFilter, clearCompleted, stats, categories, todos } = useTodoContext();
   const [showModal, setShowModal] = useState(false);
+  
+  const [openSections, setOpenSections] = useState({
+    workspace: true,
+    categories: true,
+    shortcuts: false,
+    settings: false
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  useKeyboardShortcuts({
+    onToggleSidebar: onToggle,
+    onFocusInput: () => {
+      const input = document.querySelector('.todo-input-field') as HTMLInputElement;
+      if (input) input.focus();
+    },
+    onToggleTheme: () => setIsDarkMode(!isDarkMode),
+    onNavigateNotes: () => onSelectCategory('Notes'),
+    onNavigateImportant: () => onSelectCategory('All'), 
+    onToggleCategories: () => toggleSection('categories'),
+  });
 
   return (
     <aside className={`sidebar ${hidden ? 'hidden' : ''}`}>
@@ -37,62 +60,135 @@ const Sidebar = memo(({
       </div>
 
       <div className="mobile-content-wrapper">
-        {/* Pass simplified stats directly */}
         <SidebarStats completed={stats.completed} active={stats.active} />
 
-        <div className="sidebar-nav-scroll">
-          <SidebarDropdown title="WORKSPACE" isOpen={true} onToggle={() => {}}>
-            <ul className="dropdown-list">
-              <SidebarItem 
-                label="All Tasks" 
-                icon="all" 
-                count={stats.total} 
-                isActive={activeFilter === 'All'} 
-                onClick={() => onSelectCategory('All')} 
-                isDarkMode={isDarkMode} 
-              />
-              <SidebarItem 
-                label="Notes" 
-                icon="notes" 
-                count={stats.notes} 
-                isActive={activeFilter === 'Notes'} 
-                onClick={() => onSelectCategory('Notes')} 
-                isDarkMode={isDarkMode} 
-                variant="info" 
-              />
-              <SidebarItem 
-                label="Trash" 
-                icon="trash" 
-                count={stats.deleted} 
-                isActive={activeFilter === 'Trash'} 
-                onClick={() => onSelectCategory('Trash')} 
-                isDarkMode={isDarkMode} 
-              />
-            </ul>
-          </SidebarDropdown>
+        <div className="sidebar-separator" aria-hidden="true" />
 
-          <SidebarDropdown 
+        <div className="sidebar-nav-scroll">
+            <SidebarDropdown 
             title="CATEGORIES" 
-            isOpen={true} 
-            onToggle={() => {}}
+            isOpen={openSections.categories} 
+            onToggle={() => toggleSection('categories')}
             actionButton={
-              <button className="dropdown-action-button" onClick={() => setShowModal(true)} aria-label="Add Category">
+              <button className="dropdown-action-button" onClick={(e) => { e.stopPropagation(); setShowModal(true); }}>
                 +
               </button>
             }
           >
-            <CategorySection 
-              isDarkMode={isDarkMode} 
-              activeFilter={activeFilter} 
-              onSelect={onSelectCategory} 
-            />
+            {categories.map(cat => (
+              <SidebarItem
+                key={cat.id}
+                label={cat.name}
+                icon={cat.name}
+                count={todos.filter(t => t.categories?.name === cat.name && t.status !== 'deleted').length}
+                isActive={activeFilter === cat.name}
+                onClick={() => onSelectCategory(cat.name as FilterType)}
+                isDarkMode={isDarkMode}
+              />
+            ))}
+          </SidebarDropdown>
+
+          <SidebarDropdown 
+            title="WORKSPACE" 
+            isOpen={openSections.workspace} 
+            onToggle={() => toggleSection('workspace')}
+          >
+              <SidebarItem 
+                label="All Tasks" icon="all" count={stats.total} 
+                isActive={activeFilter === 'All'} onClick={() => onSelectCategory('All')} 
+                isDarkMode={isDarkMode} 
+              />
+              <SidebarItem 
+                label="Notes" icon="notes" count={stats.notes} 
+                isActive={activeFilter === 'Notes'} onClick={() => onSelectCategory('Notes')} 
+                isDarkMode={isDarkMode} variant="info" 
+              />
+              <SidebarItem 
+                label="Trash" icon="trash" count={stats.deleted} 
+                isActive={activeFilter === 'Trash'} onClick={() => onSelectCategory('Trash')} 
+                isDarkMode={isDarkMode} 
+              />
+          </SidebarDropdown>
+
+          <SidebarDropdown 
+            title="SHORTCUTS" 
+            isOpen={openSections.shortcuts} 
+            onToggle={() => toggleSection('shortcuts')}
+          >
+            <div className="shortcut-list">
+              <div className="shortcut-row">
+                <div className="setting-info">
+                  <CategoryIcon iconName="sidebar" size={14} />
+                  <span>Toggle Sidebar</span>
+                </div>
+                <kbd className="shortcut-tag">⌘ B</kbd>
+              </div>
+
+              <div className="shortcut-row">
+                <div className="setting-info">
+                  <CategoryIcon iconName="notes" size={14} />
+                  <span>Jump to Notes</span>
+                </div>
+                <kbd className="shortcut-tag">⌘ I</kbd>
+              </div>
+
+              <div className="shortcut-row">
+                <div className="setting-info">
+                  <CategoryIcon iconName="all" size={14} />
+                  <span>Show All Tasks</span>
+                </div>
+                <kbd className="shortcut-tag">⌘ E</kbd>
+              </div>
+
+              <div className="shortcut-row">
+                <div className="setting-info">
+                  <CategoryIcon iconName={isDarkMode ? 'sun' : 'moon'} size={14} />
+                  <span>Switch Theme</span>
+                </div>
+                <kbd className="shortcut-tag">⌘ L</kbd>
+              </div>
+
+              <div className="shortcut-row">
+                <div className="setting-info">
+                  <CategoryIcon iconName="folder" size={14} />
+                  <span>List Categories</span>
+                </div>
+                <kbd className="shortcut-tag">⌘ U</kbd>
+              </div>
+            </div>
+          </SidebarDropdown>
+
+          <SidebarDropdown 
+            title="UI SETTINGS" 
+            isOpen={openSections.settings} 
+            onToggle={() => toggleSection('settings')}
+          >
+            <div className="settings-row">
+              <div className="setting-info">
+                <span className="settings-icon">
+                  <CategoryIcon
+                    iconName={isDarkMode ? 'moon' : 'sun'}
+                    size={16}
+                  />
+                </span>
+                <span>{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+              </div>
+              <label className="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  checked={isDarkMode} 
+                  onChange={(e) => setIsDarkMode(e.target.checked)} 
+                />
+                <span className="slider round"></span>
+              </label>
+            </div>
           </SidebarDropdown>
         </div>
 
         <div className="sidebar-footer">
           {stats.completed > 0 && (
             <button className="clear-btn" onClick={clearCompleted}>
-              Clear Completed
+              Clear Completed ({stats.completed})
             </button>
           )}
         </div>
@@ -101,11 +197,7 @@ const Sidebar = memo(({
       <div className="sidebar-resizer" onMouseDown={onResizeStart} />
       
       {showModal && (
-        <CategoryModal 
-          isOpen={showModal} 
-          onClose={() => setShowModal(false)} 
-          isDarkMode={isDarkMode} 
-        />
+        <CategoryModal isOpen={showModal} onClose={() => setShowModal(false)} isDarkMode={isDarkMode} />
       )}
     </aside>
   );

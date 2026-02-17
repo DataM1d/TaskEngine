@@ -1,32 +1,37 @@
 .tabs-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-7);
-  gap: var(--space-5);
+  margin: 0;
+  border: none;
 }
 
 .filter-tabs {
   display: flex;
   gap: var(--space-2);
+  margin: 0;
+  padding: 0;
 }
 
 .filter-tabs button {
-  padding: 0 14px;
-  font-size: 1.05rem;
+  padding: 1px 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--sb-text-main);
+  color: var(--sb-text-muted);
   background: transparent;
   border: 1px solid var(--sb-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  min-height: 32px;
-  transition: all 0.2s var(--ease-standard);
+  transition: all var(--transition-base);
 }
 
-.filter-tabs button:hover, 
+.filter-tabs button:hover {
+  color: var(--sb-text-main);
+  background: var(--sb-active-item-bg);
+}
+
 .filter-tabs button.active {
-  background: var(--sb-brand);
-  color: var(--sb-text-white);
-  border-color: var(--sb-brand);
+  background: color-mix(in srgb, var(--sb-brand), transparent 92%);
+  color: var(--sb-brand);
+  border: 1px solid var(--sb-border);
+  font-weight: 600;
 }

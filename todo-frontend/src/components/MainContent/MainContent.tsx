@@ -15,13 +15,11 @@ interface MainContentProps {
 }
 
 const MainContent = memo(({ filter, focusedNoteId, setFilter }: MainContentProps) => {
-  // Grab pre calculated stats from context
   const { filteredTodos, stats } = useTodoContext();
   
   const isNotesView = filter === 'Notes';
   const isTrashView = filter === 'Trash';
 
-  // Stats object from usetodos.ts
   const currentCount = isNotesView ? stats.notes : filteredTodos.length;
 
   return (
@@ -36,12 +34,13 @@ const MainContent = memo(({ filter, focusedNoteId, setFilter }: MainContentProps
           />
         ) : (
           <>
-            <div className="sb-workspace">
+            <div className="sb-workspace-static">
               <div className="tabs-header-row">
                 <TodoTabs activeFilter={filter} setFilter={setFilter} />
                 {isTrashView && <TrashActions />}
               </div>
             </div>
+
 
             <TodoArea 
               filter={filter} 

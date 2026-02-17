@@ -14,10 +14,8 @@ interface NotesWorkspaceProps {
 const NotesWorkspace = memo(({ focusedNoteId, setFilter }: NotesWorkspaceProps) => {
   const { todos, updateTodo } = useTodoContext();
 
-  // Leverage existing context logic
-  // Only show items that are active and actually have content
   const notes = useMemo(() => 
-    todos.filter(t => t.status !== 'deleted' && (t.description?.trim().length || 0) > 0)
+    todos.filter(t => t.status !== 'deleted')
   , [todos]);
 
   const selectedNote = useMemo(() => 
@@ -35,7 +33,7 @@ const NotesWorkspace = memo(({ focusedNoteId, setFilter }: NotesWorkspaceProps) 
       <main className="workspace-editor">
         {selectedNote ? (
           <NoteEditor 
-            key={selectedNote.id} // Resets editor state when switching notes
+            key={selectedNote.id} 
             note={selectedNote} 
             onUpdate={updateTodo} 
           />

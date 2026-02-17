@@ -23,7 +23,7 @@ export default function TodoHeader({ filter, taskCount }: TodoHeaderProps) {
           <nav className="saas-header__breadcrumbs" aria-label="Breadcrumb">
             <span className="breadcrumb-item">{breadcrumbParent}</span>
             <IoChevronForwardOutline className="breadcrumb-sep" />
-            <span className="breadcrumb-item active">{filter}</span>
+            <span className="breadcrumb-active">{filter}</span>
             <div className="saas-header__accent-badge">
               {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
             </div>

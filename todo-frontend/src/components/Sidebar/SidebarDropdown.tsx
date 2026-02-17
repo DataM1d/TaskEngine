@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import './SidebarDropdown.css';
 
-
 interface SidebarDropdownProps {
   title: string;
   children: ReactNode;
@@ -12,7 +11,7 @@ interface SidebarDropdownProps {
 
 export default function SidebarDropdown({ title, children, isOpen, onToggle, actionButton }: SidebarDropdownProps) {
   return (
-    <section className="dropdown-section">
+    <nav className="dropdown-section" aria-label={title}>
       <div 
         className="dropdown-header" 
         onClick={onToggle} 
@@ -20,20 +19,17 @@ export default function SidebarDropdown({ title, children, isOpen, onToggle, act
         aria-expanded={isOpen}
       >
         <span className="dropdown-title">{title}</span>
-        
         <div className="dropdown-header-actions">
           {actionButton}
-          <span className={`chevron ${isOpen ? 'open' : ''}`}>
-             ▼
-          </span>
+          <span className={`chevron ${isOpen ? 'open' : ''}`}>▼</span>
         </div>
       </div>
       
       <div className={`dropdown-container ${isOpen ? 'show' : ''}`}>
-        <div className="dropdown-content">
+        <div className="dropdown-content-wrapper">
           {children}
         </div>
       </div>
-    </section>
+    </nav>
   );
 }

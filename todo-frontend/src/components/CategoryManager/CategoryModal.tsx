@@ -13,17 +13,14 @@ interface CategoryModalProps {
 export default function CategoryModal({ onClose, isDarkMode }: CategoryModalProps) {
   const { categories, createCategory, deleteCategory } = useTodoContext();
   
-  // Local State
   const [categoryName, setCategoryName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  // Refs
   const inputRef = useRef<HTMLInputElement>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
     return () => {
@@ -31,7 +28,6 @@ export default function CategoryModal({ onClose, isDarkMode }: CategoryModalProp
     };
   }, []);
 
-  // Handlers
   const handleCreate = async () => {
     if (!categoryName.trim()) {
       setError('Category name cannot be empty');

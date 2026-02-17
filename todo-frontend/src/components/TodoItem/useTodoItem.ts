@@ -22,8 +22,7 @@ export function useTodoItem(todo: Todo, setFilter: (f: FilterType, id?: string) 
   const isVirtual = !todo.category_id;
   const isTrash = todo.status === 'deleted';
 
-  // --- Logic Strategy ---
-  // Senior Move: Define the "intent" of the item actions here.
+
   const strategy = useMemo(() => ({
     onMainClick: isTrash ? undefined : () => updateTodo(todo.id, { is_completed: !todo.is_completed }),
     onDelete: () => deleteTodo(todo.id),

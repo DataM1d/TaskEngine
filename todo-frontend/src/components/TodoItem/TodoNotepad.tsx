@@ -3,7 +3,6 @@ import CategoryIcon from '../ui/CategoryIcon';
 import { detectIconFromName } from '../../utils/iconDetector';
 import './TodoNotepad.css';
 
-
 interface TodoNotepadProps {
   localNote: string;
   setLocalNote: (val: string) => void;
@@ -15,6 +14,25 @@ interface TodoNotepadProps {
 
 export default function TodoNotepad({ localNote, setLocalNote, onSave, onClose, showSaveToast, onExpand }: TodoNotepadProps) {
   const notepadRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (notepadRef.current) {
+      notepadRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      onSave();
+    }
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -32,7 +50,12 @@ export default function TodoNotepad({ localNote, setLocalNote, onSave, onClose, 
           <h4>Task Notes</h4>
         </div>
         <div className="header-right-actions">
-          <button className="expand-workspace-btn" disabled={!localNote.trim()} onClick={onExpand}>
+          <button 
+            className="expand-workspace-btn" 
+            disabled={!localNote.trim()} 
+            onClick={onExpand} 
+            title="Expand to Workspace"
+          >
             <CategoryIcon iconName={detectIconFromName('notes-workspace')} />
           </button>
           <button className="close-note-btn" onClick={onClose}>×</button>
@@ -43,12 +66,15 @@ export default function TodoNotepad({ localNote, setLocalNote, onSave, onClose, 
           autoFocus 
           value={localNote} 
           onChange={(e) => setLocalNote(e.target.value)} 
+          onKeyDown={handleKeyDown} 
           placeholder="Ctrl/Cmd + Enter to save..."
         />
       </div>
       <div className="notepad-footer">
         <div className="footer-info">
-          <span className={`footer-status ${showSaveToast ? 'saved-active' : ''}`}>{showSaveToast ? '✓ Saved' : ''}</span>
+          <span className={`footer-status ${showSaveToast ? 'saved-active' : ''}`}>
+            {showSaveToast ? '✓ Saved' : ''}
+          </span>
           <span className='char-count'>{localNote.length} chars</span>
         </div>
         <button className='submit-note-btn' onClick={onSave}>Save</button>

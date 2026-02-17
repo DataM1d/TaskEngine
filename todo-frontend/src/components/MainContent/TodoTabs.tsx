@@ -7,7 +7,6 @@ interface TodoTabsProps {
 }
 
 export default function TodoTabs({ activeFilter, setFilter }: TodoTabsProps) {
-  // Explicitly defining system workspace filters
   const tabs: FilterType[] = ['All', 'Notes', 'Trash'];
 
   return (

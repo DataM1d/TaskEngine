@@ -1,7 +1,6 @@
 export const detectIconFromName = (categoryName: string, isDarkMode?: boolean): string => {
   const name = categoryName.toLowerCase().trim();
 
-  // 1. EXACT MATCHES (High Priority)
   const exactMatches: Record<string, string> = {
     'all': 'clipboard-list',
     'all tasks': 'clipboard-list',
@@ -25,7 +24,6 @@ export const detectIconFromName = (categoryName: string, isDarkMode?: boolean): 
 
   if (exactMatches[name]) return exactMatches[name];
 
-  // 2. KEYWORD MAPPING
   const keywordMap: Record<string, string[]> = {
     'laptop': ['programming', 'code', 'coding', 'dev', 'software', 'tech', 'script'],
     'monitor': ['computer', 'pc', 'desktop', 'screen'],

@@ -39,20 +39,32 @@ const TodoItem = memo(({ todo, isTrashView, setFilter }: TodoItemProps) => {
             </span>
           )}
 
-          <div className="button-group">
+          <div className='button-group'>
             {!isTrashView && (
-              <button onClick={(e) => { e.stopPropagation(); actions.setIsNoteOpen(true); }} title="Open Note">
+              <button
+               className={`note-btn ${(todo.notes?.trim() || state.localNote?.trim()) ? 'has-notes' : ''}`}
+               onClick={(e) => { e.stopPropagation(); actions.setIsNoteOpen(true); }}
+               title='Open Note'
+              >
                 <CategoryIcon iconName={detectIconFromName('notes')} />
               </button>
             )}
 
             {isTrashView && (
-              <button onClick={(e) => { e.stopPropagation(); strategy.onRestore(); }} title="Restore">
+              <button 
+                className="restore-btn" 
+                onClick={(e) => { e.stopPropagation(); strategy.onRestore(); }} 
+                title="Restore"
+              >
                 <CategoryIcon iconName={detectIconFromName('recycle bin')} />
               </button>
             )}
 
-            <button onClick={(e) => { e.stopPropagation(); strategy.onDelete(); }} title="Delete">
+            <button
+              className='delete-btn'
+              onClick={(e) => { e.stopPropagation(); strategy.onDelete(); }}
+              title='Delete'
+            >
               <CategoryIcon iconName={detectIconFromName('close')} />
             </button>
           </div>

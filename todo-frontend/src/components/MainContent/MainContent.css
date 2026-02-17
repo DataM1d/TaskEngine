@@ -1,45 +1,47 @@
 .sb-dashboard-shell {
   flex: 1;
-  min-width: 0;
+  max-width: var(--content-max);
   height: 100vh;
-  background: var(--sb-bg);
+  background: var(--sb-bg); 
   display: flex;
   flex-direction: column;
   overflow: hidden; 
 }
 
+.sb-workspace-static {
+  padding: 21px 24px;
+  background: var(--sb-surface); 
+  border-bottom: 1px solid var(--sb-border); 
+  z-index: 10; 
+}
+
 .sb-container {
   flex: 1;
   width: 100%;
-  max-width: var(--container-max);
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-5);
+  max-width: var(--container-max); 
+  margin: 0 auto; 
   display: flex;
   flex-direction: column;
-  overflow-y: auto; 
-  scrollbar-gutter: stable; 
-}
-
-.sb-container::-webkit-scrollbar { width: 6px; }
-.sb-container::-webkit-scrollbar-track { background: transparent; }
-.sb-container::-webkit-scrollbar-thumb {
-  background: var(--sb-border);
-  border-radius: 10px;
+  overflow: hidden; 
+  background: var(--sb-surface); 
+  border: none; 
 }
 
 .content-container {
   width: 100%;
   max-width: var(--content-max); 
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 var(--space-6); 
 }
 
+
 .pro-delete-btn {
-  width: 40px;
-  height: 40px;
-  border: none;
+  width: 32px; 
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent; 
   background: transparent;
   color: var(--sb-text-muted);
   cursor: pointer;
@@ -50,15 +52,33 @@
 }
 
 .pro-delete-btn:hover { 
-  color: #ef4444; 
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1); 
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .pro-delete-btn.confirm {
   color: #ef4444;
-  transform: scale(1.25);
+  transform: scale(1.1);
   animation: 
     icon-vibrate-horizontal 1.5s var(--ease-standard) forwards, 
     icon-pulse-glow 2s ease-in-out infinite;
+}
+
+.sb-container::-webkit-scrollbar { width: 6px; }
+.sb-container::-webkit-scrollbar-track { background: transparent; }
+.sb-container::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.todo-list-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 @keyframes icon-vibrate-horizontal {
@@ -73,7 +93,7 @@
 }
 
 @media (max-width: 1024px) {
-  .main-content { padding: var(--space-4); }
+  .main-content { padding: var(--space-3); }
 }
 
 @media (max-width: 768px) {
