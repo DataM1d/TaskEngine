@@ -2,7 +2,7 @@ import { TodoProvider } from './context/TodoContext';
 import { useSidebar } from './hooks/useSidebar';
 import { useTheme } from './hooks/useTheme';
 import { useNavigation } from './hooks/useNavigation';
-
+import {useAuth} from './hooks/useAuth';
 import Sidebar from './components/Sidebar/Sidebar';
 import MainContent from './components/MainContent/MainContent';
 import { CollapsedNav } from './components/MainContent/CollapsedNav';
@@ -16,6 +16,11 @@ function AppLayout() {
   const dynamicStyles = { 
     '--sidebar-width': `${width}px` 
   } as React.CSSProperties;
+
+  const { isAuthenticating } = useAuth();
+    if (isAuthenticating) {
+      return <div className="loading-screen">Initialising Workspace...</div>
+    }
 
   return (
     <div className={`app-wrapper ${isDarkMode ? 'dark-theme' : 'light-theme'}`} style={dynamicStyles}>
