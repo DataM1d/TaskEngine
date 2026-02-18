@@ -1,12 +1,3 @@
-TaskEngine is a TypeScript based productivity workspace built to reduce friction in task management. It automates categorization, 
-draft saving, and cleanup so you can focus on actual work instead of maintaining lists.
-
-Most to do apps require constant manual organization. TaskEngine removes that overhead by handling categorization and persistence automatically,
-while keeping the interface fast and minimal.
-
-![Dark Mode](./todo-frontend/assets/dark_main_app.png)
-![Light Mode](./todo-frontend/assets/light_main_app.png)
-
 Automatic Categorization
 
   The engine (ItemTypeDetector.ts) analyzes task titles as user types, and assigns categories automatically.
